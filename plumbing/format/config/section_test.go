@@ -323,3 +323,85 @@ func (s *SectionSuite) TestSubsection_RemoveOption(c *C) {
 	}
 	c.Assert(sect.RemoveOption("key1"), DeepEquals, expected)
 }
+
+func (s *SectionSuite) TestMergeSections(c *C) {
+	initial := Sections{
+		{
+			Name: "initial",
+			Subsections: Subsections{
+				{
+					Name: "initial",
+					Options: Options{
+						{Key: "initial", Value: "initial"},
+					},
+				},
+				{
+					Name: "in-both",
+					Options: Options{
+						{Key: "initial", Value: "initial"},
+						{Key: "in-both", Value: "initial"},
+					},
+				},
+			},
+		},
+		{
+			Name: "in-both",
+			Subsections: Subsections{
+				{
+					Name: "initial",
+					Options: Options{
+						{Key: "initial", Value: "initial"},
+					},
+				},
+				{
+					Name: "in-both",
+					Options: Options{
+						{Key: "initial", Value: "initial"},
+						{Key: "in-both", Value: "initial"},
+					},
+				},
+			},
+		},
+	}
+	added := Sections{
+		{
+			Name: "added",
+			Subsections: Subsections{
+				{
+					Name: "added",
+					Options: Options{
+						{Key: "added", Value: "added"},
+					},
+				},
+				{
+					Name: "in-both",
+					Options: Options{
+						{Key: "added", Value: "added"},
+						{Key: "in-both", Value: "added"},
+					},
+				},
+			},
+		},
+		{
+			Name: "in-both",
+			Subsections: Subsections{
+				{
+					Name: "added",
+					Options: Options{
+						{Key: "added", Value: "added"},
+					},
+				},
+				{
+					Name: "in-both",
+					Options: Options{
+						{Key: "added", Value: "added"},
+						{Key: "in-both", Value: "added"},
+					},
+				},
+			},
+		},
+	}
+	merged := MergeSections(added, initial)
+	c.Assert(merged.Section(""))
+
+}

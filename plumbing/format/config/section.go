@@ -48,6 +48,15 @@ func (s Sections) GoString() string {
 	return strings.Join(strs, ", ")
 }
 
+func (s Sections) Section(name string) *Section{
+	for _, section := range s{
+		if section.Name==name{
+			return section
+		}
+	}
+	return 
+}
+
 type Subsections []*Subsection
 
 func (s Subsections) GoString() string {
@@ -178,4 +187,49 @@ func (s *Subsection) SetOption(key string, value ...string) *Subsection {
 func (s *Subsection) RemoveOption(key string) *Subsection {
 	s.Options = s.Options.withoutOption(key)
 	return s
+}
+
+func MergeSubsections(dst, src Subsections) Subsections {
+	srcSubsections := map[string]*Subsection{}
+	for _, subsection := range src {
+		if subsection != nil {
+			srcSubsections[subsection.Name] = subsection
+		}
+	}
+	for _, subsection := range dst {
+		if subsection != nil {
+			srcSubsection, ok := srcSubsections[subsection.Name]
+			if ok {
+				subsection.Options = append(srcSubsection.Options, subsection.Options...)
+			}
+			delete(srcSubsections, subsection.Name)
+		}
+	}
+	for _, subsection := range srcSubsections {
+		dst = append(dst, subsection)
+	}
+	return dst
+}
+
+func MergeSections(dst, src Sections) Sections {
+	srcSections := map[string]*Section{}
+	for _, section := range src {
+		if section != nil {
+			srcSections[section.Name] = section
+		}
+	}
+	for _, section := range dst {
+		if section != nil {
+			srcSection, ok := srcSections[section.Name]
+			if ok {
+				section.Options = append(srcSection.Options, section.Options...)
+				section.Subsections = MergeSubsections(section.Subsections, srcSection.Subsections)
+			}
+			delete(srcSections, section.Name)
+		}
+	}
+	for _, section := range srcSections {
+		dst = append(dst, section)
+	}
+	return dst
 }

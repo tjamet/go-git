@@ -15,6 +15,7 @@ import (
 	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5/internal/url"
 	format "github.com/go-git/go-git/v5/plumbing/format/config"
+	"github.com/imdario/mergo"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -178,6 +179,13 @@ func LoadConfig(scope Scope) (*Config, error) {
 	}
 
 	return NewConfig(), nil
+}
+
+func MergeConfigs(dst, src *Config) *Config {
+	mergedRaw := format.MergeSections(dst.Raw.Sections, src.Raw.Sections)
+	mergo.Merge(dst, src)
+	dst.Raw.Sections = mergedRaw
+	return dst
 }
 
 // Paths returns the config file location for a given scope.

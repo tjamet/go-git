@@ -28,7 +28,6 @@ import (
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	"github.com/go-git/go-git/v5/storage/filesystem/dotgit"
 	"github.com/go-git/go-git/v5/utils/ioutil"
-	"github.com/imdario/mergo"
 )
 
 // GitDirName this is a special folder where all the git stuff is.
@@ -513,10 +512,9 @@ func (r *Repository) ConfigScoped(scope config.Scope) (*config.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	_ = mergo.Merge(global, system)
-	_ = mergo.Merge(local, global)
-	return local, nil
+	merged := config.MergeConfigs(global, system)
+	merged = config.MergeConfigs(local, merged)
+	return merged, nil
 }
 
 // Remote return a remote if exists
